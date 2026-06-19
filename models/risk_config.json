@@ -1,0 +1,38 @@
+{
+  "seed": 42,
+  "feature_columns": [
+    "volume_zscore_20d",
+    "intraday_vol_pct",
+    "volume_acceleration",
+    "return_zscore_20d",
+    "market_breadth",
+    "vix_level",
+    "ma_ratio_5_20",
+    "return_std_20d",
+    "day_of_week",
+    "fomc_flag",
+    "cpi_flag",
+    "nfp_flag"
+  ],
+  "score_weights": {
+    "volume_zscore_percentile": 0.4,
+    "intraday_vol_percentile": 0.25,
+    "anomaly_proximity_percentile": 0.2,
+    "scheduled_event": 0.15
+  },
+  "tier_percentiles": {
+    "normal_lt": 0.8,
+    "moderate_lt": 0.95,
+    "high_lt": 0.99,
+    "critical_ge": 0.99
+  },
+  "model": {
+    "objective": "multi:softprob",
+    "num_class": 4,
+    "max_depth": 6,
+    "learning_rate": 0.05,
+    "n_estimators": 500,
+    "early_stopping_rounds": 50,
+    "random_state": 42
+  }
+}

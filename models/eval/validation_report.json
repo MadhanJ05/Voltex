@@ -1,0 +1,329 @@
+{
+  "headline_metrics": {
+    "ticker_test": {
+      "macro_f1_high_critical": 0.7800075242036488,
+      "precision_high_critical": 0.9554195804195804,
+      "recall_high_critical": 0.8420647149460708,
+      "pr_auc_high_critical": 0.8703067732968107,
+      "roc_auc_high_critical": 0.9268421631255145,
+      "pr_auc_ovr_macro": 0.8498517475399113,
+      "roc_auc_ovr_macro": 0.9271821724877792
+    },
+    "calibration": {
+      "before": {
+        "ece": 0.016588779435514126,
+        "brier": 0.014391200988891163
+      },
+      "after": {
+        "ece": 0.016646788563653696,
+        "brier": 0.012909742178718299
+      }
+    },
+    "p95_latency_ms": 4249.457739017089
+  },
+  "backtest": [
+    {
+      "event": "Black Monday 2015",
+      "date": "2015-08-24",
+      "market_risk_tier": "Critical",
+      "stress_breadth": 0.9451219512195121,
+      "p_critical": 0.9466561283237879,
+      "forecast_surprise_zscore": 6.297910471630671,
+      "anomaly_score": 0.6400353312073314,
+      "lead_time_minutes": 15,
+      "lead_time_convention": "alert issued 09:15 ET; stress onset convention 09:30 ET open",
+      "agent_path": "llm",
+      "guardrails": {
+        "passed": true,
+        "failures": [],
+        "checks": {
+          "G1_tier_immutability": {
+            "passed": true,
+            "reason": "tier and probabilities immutable"
+          },
+          "G2_driver_containment": {
+            "passed": true,
+            "reason": "drivers contained"
+          },
+          "G3_precedent_containment": {
+            "passed": true,
+            "reason": "precedents contained"
+          },
+          "G4_reasoning_filter": {
+            "passed": true,
+            "reason": "reasoning filter passed"
+          }
+        },
+        "path": "llm"
+      },
+      "latency_ms": 4864.097291021608,
+      "alert": {
+        "risk_tier": "Critical",
+        "p_critical": 0.9466561283237879,
+        "p_high": 1.1652116070793601e-05,
+        "recommended_action": "Activate incident readiness: monitor order-entry latency, capacity, vendor dependencies, and customer-access channels.",
+        "plain_english_brief": "The system is signaling a Critical risk tier with a high probability of critical impact. Key drivers include significant market breadth, indicating widespread market movement, alongside elevated volume and volatility. An anomaly score of 0.64 and a high forecast surprise z-score further support this assessment. The VIX level is also elevated, suggesting increased market fear. These factors collectively point to a heightened risk of market dislocation.",
+        "top_drivers": [
+          "market_breadth",
+          "volume_zscore_20d"
+        ],
+        "cited_precedents": [
+          "Volmageddon VIX shock (2018-02-05)",
+          "Japan market selloff (2024-08-05)",
+          "Treasury-yield shock (2023-10-20)"
+        ],
+        "confidence_note": "The model's confidence in this Critical risk assessment is high, supported by multiple converging indicators including a very high p_critical, significant market breadth, elevated volume and volatility, and a notable anomaly score. The cited precedents show similar market conditions and operational outcomes, reinforcing the recommended action. No event flags (FOMC, CPI, NFP) are active, suggesting the risk is not tied to scheduled economic announcements."
+      },
+      "source_note": "historical constituent aggregation"
+    },
+    {
+      "event": "January 2016 selloff",
+      "date": "2016-01-15",
+      "market_risk_tier": "Critical",
+      "stress_breadth": 0.9393939393939394,
+      "p_critical": 0.8301577342911827,
+      "forecast_surprise_zscore": 2.0356560217262865,
+      "anomaly_score": 0.7956434214882213,
+      "lead_time_minutes": 15,
+      "lead_time_convention": "alert issued 09:15 ET; stress onset convention 09:30 ET open",
+      "agent_path": "fallback",
+      "guardrails": {
+        "passed": false,
+        "failures": [],
+        "path": "fallback"
+      },
+      "latency_ms": 870.8247909962665,
+      "alert": {
+        "risk_tier": "Critical",
+        "p_critical": 0.8301577342911827,
+        "p_high": 0.11217723462577486,
+        "recommended_action": "Activate pre-market incident readiness: assign an SRE owner, verify failover and capacity, and monitor order-entry and login paths continuously.",
+        "plain_english_brief": "Critical market-platform risk for 2016-01-15. Primary model drivers are cpi_flag, return_zscore_20d, volume_zscore_20d. Forecast surprise is 2.0 standard deviations. The anomaly signal is elevated and is treated as supporting evidence.",
+        "top_drivers": [
+          "cpi_flag",
+          "return_zscore_20d",
+          "volume_zscore_20d"
+        ],
+        "cited_precedents": [],
+        "confidence_note": "Deterministic template used: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5."
+      },
+      "source_note": "historical constituent aggregation"
+    },
+    {
+      "event": "Brexit",
+      "date": "2016-06-24",
+      "market_risk_tier": "Critical",
+      "stress_breadth": 0.9879275653923542,
+      "p_critical": 0.9852421920501977,
+      "forecast_surprise_zscore": 5.451304380251543,
+      "anomaly_score": 0.14026815084247887,
+      "lead_time_minutes": 15,
+      "lead_time_convention": "alert issued 09:15 ET; stress onset convention 09:30 ET open",
+      "agent_path": "llm",
+      "guardrails": {
+        "passed": true,
+        "failures": [],
+        "checks": {
+          "G1_tier_immutability": {
+            "passed": true,
+            "reason": "tier and probabilities immutable"
+          },
+          "G2_driver_containment": {
+            "passed": true,
+            "reason": "drivers contained"
+          },
+          "G3_precedent_containment": {
+            "passed": true,
+            "reason": "precedents contained"
+          },
+          "G4_reasoning_filter": {
+            "passed": true,
+            "reason": "reasoning filter passed"
+          }
+        },
+        "path": "llm"
+      },
+      "latency_ms": 2405.539083003532,
+      "alert": {
+        "risk_tier": "Critical",
+        "p_critical": 0.9852421920501977,
+        "p_high": 6.2108575951473e-05,
+        "recommended_action": "Activate incident readiness: monitor order-entry latency, capacity, vendor dependencies, and customer-access channels.",
+        "plain_english_brief": "The system indicates a critical risk level with a high probability of a critical event. Key drivers include significant market breadth, a negative 20-day return z-score, and elevated intraday volatility. The forecast surprise z-score is notably high, suggesting a significant deviation from expected market behavior.",
+        "top_drivers": [
+          "market_breadth",
+          "return_zscore_20d",
+          "intraday_vol_pct"
+        ],
+        "cited_precedents": [
+          "Volmageddon VIX shock (2018-02-05)",
+          "COVID vaccine rotation (2020-11-09)",
+          "Japan market selloff (2024-08-05)"
+        ],
+        "confidence_note": "The model shows high confidence in this critical risk assessment, supported by a very high probability of a critical event and a significant forecast surprise z-score. The anomaly score is low, suggesting the current conditions, while extreme, are not entirely unprecedented in their pattern. The VIX level is elevated, further supporting the risk assessment."
+      },
+      "source_note": "historical constituent aggregation"
+    },
+    {
+      "event": "US election",
+      "date": "2016-11-09",
+      "market_risk_tier": "Critical",
+      "stress_breadth": 0.9819277108433735,
+      "p_critical": 0.9690167824007572,
+      "forecast_surprise_zscore": 4.484851575281603,
+      "anomaly_score": 0.2610142116527159,
+      "lead_time_minutes": 15,
+      "lead_time_convention": "alert issued 09:15 ET; stress onset convention 09:30 ET open",
+      "agent_path": "fallback",
+      "guardrails": {
+        "passed": false,
+        "failures": [],
+        "path": "fallback"
+      },
+      "latency_ms": 739.8787920246832,
+      "alert": {
+        "risk_tier": "Critical",
+        "p_critical": 0.9690167824007572,
+        "p_high": 0.0055760275360257515,
+        "recommended_action": "Activate pre-market incident readiness: assign an SRE owner, verify failover and capacity, and monitor order-entry and login paths continuously.",
+        "plain_english_brief": "Critical market-platform risk for 2016-11-09. Primary model drivers are market_breadth, vix_level, return_zscore_20d. Forecast surprise is 4.5 standard deviations.",
+        "top_drivers": [
+          "market_breadth",
+          "vix_level",
+          "return_zscore_20d"
+        ],
+        "cited_precedents": [],
+        "confidence_note": "Deterministic template used: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5."
+      },
+      "source_note": "historical constituent aggregation"
+    },
+    {
+      "event": "VIX shock",
+      "date": "2018-02-05",
+      "market_risk_tier": "High",
+      "stress_breadth": 0.04554455445544554,
+      "p_critical": 3.869217432959906e-06,
+      "forecast_surprise_zscore": 3.1585511340518146,
+      "anomaly_score": 0.5124014003730698,
+      "lead_time_minutes": 15,
+      "lead_time_convention": "alert issued 09:15 ET; stress onset convention 09:30 ET open",
+      "agent_path": "fallback",
+      "guardrails": {
+        "passed": false,
+        "failures": [],
+        "path": "fallback"
+      },
+      "latency_ms": 829.5967089943588,
+      "alert": {
+        "risk_tier": "High",
+        "p_critical": 3.869217432959906e-06,
+        "p_high": 0.04448243993117834,
+        "recommended_action": "Place the trading-platform SRE on heightened watch; verify capacity, order-entry latency, and vendor health.",
+        "plain_english_brief": "High market-platform risk for 2018-02-05. Primary model drivers are volume_zscore_20d, return_zscore_20d, intraday_vol_pct. Forecast surprise is 3.2 standard deviations. The anomaly signal is elevated and is treated as supporting evidence.",
+        "top_drivers": [
+          "volume_zscore_20d",
+          "return_zscore_20d",
+          "intraday_vol_pct"
+        ],
+        "cited_precedents": [],
+        "confidence_note": "Deterministic template used: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5."
+      },
+      "source_note": "historical constituent aggregation"
+    },
+    {
+      "event": "COVID market shock",
+      "date": "2020-03-09",
+      "market_risk_tier": "Normal",
+      "stress_breadth": 0.0,
+      "p_critical": 0.0,
+      "forecast_surprise_zscore": 0.0,
+      "anomaly_score": 0.9946520550796927,
+      "lead_time_minutes": 15,
+      "lead_time_convention": "alert issued 09:15 ET; stress onset convention 09:30 ET open",
+      "agent_path": "fallback",
+      "guardrails": {
+        "passed": false,
+        "failures": [],
+        "path": "fallback"
+      },
+      "latency_ms": 774.0990839956794,
+      "alert": {
+        "risk_tier": "Normal",
+        "p_critical": 0.0,
+        "p_high": 0.0,
+        "recommended_action": "Continue standard monitoring; no action beyond routine readiness.",
+        "plain_english_brief": "Normal market-platform risk for 2020-03-09. Primary model drivers are volume_zscore_20d, cpi_flag, intraday_vol_pct. Forecast surprise is 0.0 standard deviations. The anomaly signal is elevated and is treated as supporting evidence.",
+        "top_drivers": [
+          "volume_zscore_20d",
+          "cpi_flag",
+          "intraday_vol_pct"
+        ],
+        "cited_precedents": [],
+        "confidence_note": "Deterministic template used: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5."
+      },
+      "source_note": "SPY-only aggregation; forecast surprise unavailable across the 2018\u20132020 data gap"
+    }
+  ],
+  "gates": [
+    {
+      "name": "macro_f1_high_critical",
+      "value": 0.7800075242036488,
+      "target": ">= 0.77",
+      "passed": true
+    },
+    {
+      "name": "precision_high_critical",
+      "value": 0.9554195804195804,
+      "target": ">= 0.75",
+      "passed": true
+    },
+    {
+      "name": "recall_high_critical",
+      "value": 0.8420647149460708,
+      "target": ">= 0.80",
+      "passed": true
+    },
+    {
+      "name": "pr_auc_ovr_macro",
+      "value": 0.8498517475399113,
+      "target": ">= 0.78",
+      "passed": true
+    },
+    {
+      "name": "roc_auc_ovr_macro",
+      "value": 0.9271821724877792,
+      "target": ">= 0.85",
+      "passed": true
+    },
+    {
+      "name": "brier",
+      "value": 0.012909742178718299,
+      "target": "<= 0.10",
+      "passed": true
+    },
+    {
+      "name": "ece",
+      "value": 0.016646788563653696,
+      "target": "<= 0.05",
+      "passed": true
+    },
+    {
+      "name": "crisis_event_recall",
+      "value": 0.8333333333333334,
+      "target": "= 1.00",
+      "passed": false
+    },
+    {
+      "name": "guardrail_compliance",
+      "value": 1.0,
+      "target": "= 1.00",
+      "passed": true
+    },
+    {
+      "name": "p95_agent_latency_ms",
+      "value": 4249.457739017089,
+      "target": "< 5000",
+      "passed": true
+    }
+  ]
+}

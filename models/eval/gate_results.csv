@@ -1,0 +1,11 @@
+name,value,target,passed
+macro_f1_high_critical,0.7800075242036488,>= 0.77,True
+precision_high_critical,0.9554195804195804,>= 0.75,True
+recall_high_critical,0.8420647149460708,>= 0.80,True
+pr_auc_ovr_macro,0.8498517475399113,>= 0.78,True
+roc_auc_ovr_macro,0.9271821724877792,>= 0.85,True
+brier,0.012909742178718299,<= 0.10,True
+ece,0.016646788563653696,<= 0.05,True
+crisis_event_recall,0.8333333333333334,= 1.00,False
+guardrail_compliance,1.0,= 1.00,True
+p95_agent_latency_ms,4249.457739017089,< 5000,True

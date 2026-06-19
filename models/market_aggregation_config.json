@@ -1,0 +1,6 @@
+{
+  "normal_lt_stress_breadth": 0.03,
+  "moderate_lt_stress_breadth": 0.04,
+  "high_lt_stress_breadth": 0.15,
+  "critical_ge_stress_breadth": 0.15
+}
