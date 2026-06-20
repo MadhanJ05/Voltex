@@ -276,9 +276,9 @@
     ]
   },
   "agent": {
-    "alerts_generated": 41,
-    "llm_path_count": 21,
-    "fallback_count": 20,
+    "alerts_generated": 51,
+    "llm_path_count": 25,
+    "fallback_count": 26,
     "latencies_ms": [
       1.767,
       0.044,
@@ -320,7 +320,17 @@
       2405.539,
       739.879,
       829.597,
-      774.099
+      774.099,
+      4189.514,
+      4271.494,
+      4325.101,
+      2873.784,
+      2805.529,
+      2638.141,
+      2126.398,
+      3234.693,
+      3326.41,
+      2993.607
     ],
     "latest_guardrail_results": {
       "passed": false,

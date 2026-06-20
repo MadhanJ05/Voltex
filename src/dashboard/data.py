@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 import sqlite3
 from pathlib import Path
 
@@ -47,18 +48,33 @@ def feature_snapshot(date: str) -> dict:
 
 
 def forecast_chart_data(date: str) -> pd.DataFrame:
-    """Use saved forecaster outputs; crisis points retain their true forecast."""
-    metrics = json.loads((ROOT / "models/metrics.json").read_text())
-    for item in metrics.get("forecaster", {}).get("crisis_forecast_surprises", []):
-        if item["date"] == date:
-            return pd.DataFrame({"actual": [item["actual_volume"]], "forecast": [item["forecast"]]}, index=[date])
+    """Return a ten-session actual/forecast/threshold view ending on ``date``."""
     path = ROOT / "models/forecast_backtest_2018.csv"
     if path.exists():
         frame = pd.read_csv(path, parse_dates=["date"])
         selected = frame.loc[frame["date"].astype(str).eq(date)]
         if not selected.empty:
-            return selected.set_index("date")[["actual", "forecast"]]
-    return pd.DataFrame()
+            trailing = frame.loc[frame["date"] <= pd.Timestamp(date)].tail(10).set_index("date")[["actual", "forecast"]]
+            trailing["alert_threshold"] = trailing["forecast"] * 1.5
+            return trailing
+    # Historical crisis replays pre-date the saved 2018 backtest. Recreate a
+    # strictly one-day-ahead trailing forecast from the saved daily series.
+    history = pd.read_csv(ROOT / "data/processed/historical_features.csv", parse_dates=["date"])
+    selected_day = pd.Timestamp(date)
+    window = history.loc[history["date"] <= selected_day].tail(10)
+    if len(window) < 10: return pd.DataFrame()
+    from src.models.forecaster import VolumeForecaster
+    metrics = json.loads((ROOT / "models/metrics.json").read_text())
+    forecaster = VolumeForecaster(ensemble_weights=metrics["forecaster"]["ensemble_weights"])
+    records = []
+    for _, target in window.iterrows():
+        prior = history.loc[history["date"] < target["date"], ["date", "total_volume", "fomc_flag", "cpi_flag", "nfp_flag"]]
+        prophet, arima, order = forecaster._fit_models(prior, select_order=forecaster.arima_order is None)
+        forecaster.arima_order = order
+        raw = forecaster._predict_with_models(prophet, arima, pd.DataFrame([target]))
+        forecast = forecaster._ensemble(raw, forecaster.ensemble_weights).iloc[0]["forecast"]
+        records.append({"date": target["date"], "actual": target["total_volume"], "forecast": forecast, "alert_threshold": forecast * 1.5})
+    return pd.DataFrame(records).set_index("date")
 
 
 def load_audit(limit: int = 50) -> pd.DataFrame:
@@ -72,3 +88,59 @@ def load_audit(limit: int = 50) -> pd.DataFrame:
     frame["path"] = frame["llm_used"].map({1: "LLM", 0: "Fallback"})
     frame["guardrails"] = frame["guardrail_json"].map(lambda text: "PASS" if json.loads(text).get("passed") else "FALLBACK")
     return frame[["timestamp", "date", "tier", "path", "guardrails", "latency_ms"]]
+
+
+def live_day_result() -> dict:
+    """Run the saved model stack over the latest SPY/^VIX session.
+
+    SPY is explicitly a single-index proxy in live mode; the output carries
+    that caveat rather than inventing constituent breadth.
+    """
+    from src.agent.agent import VoltexAgent
+    from src.data.features import FEATURE_COLUMNS, engineer_features
+    from src.data.loader import LiveMarketLoader
+    from src.models.anomaly import load_anomaly_detector
+    from src.models.classifier import aggregate_to_market, load_classifier
+    from src.models.forecaster import VolumeForecaster
+
+    # Fetch only the newest trading sessions; the warmed cache contributes the
+    # longer feature/forecast history needed for this live inference.
+    cache_path = ROOT / "data/cache/live_market.csv"
+    exists = cache_path.exists()
+    age_hours = (time.time() - cache_path.stat().st_mtime) / 3600 if exists else None
+    print(
+        f"[VOLTEX LIVE] cache_path={cache_path.resolve()} exists={exists} "
+        f"age_hours={age_hours:.3f}" if age_hours is not None else
+        f"[VOLTEX LIVE] cache_path={cache_path.resolve()} exists=False age_hours=n/a",
+        flush=True,
+    )
+    loader = LiveMarketLoader(cache_path)
+    daily, feed_status = loader.load_with_status(period="5d", prefer_fresh_cache=True)
+    print(f"[VOLTEX LIVE] branch={feed_status} latest_date={daily['date'].max()}", flush=True)
+    features = engineer_features(daily)
+    feature = features.iloc[-1]
+    classifier = load_classifier(ROOT / "models")
+    ticker_row = pd.DataFrame([{**{column: feature[column] for column in FEATURE_COLUMNS}, "ticker": "SPY", "date": feature["date"]}])
+    ticker_prediction = classifier.predict_tickers(ticker_row, include_shap=False)
+    market = aggregate_to_market(ticker_prediction, feature["date"])
+    market.update({"p_critical": float(ticker_prediction.p_critical.iloc[0]), "p_high": float(ticker_prediction.p_high.iloc[0]),
+                   "shap_top3": classifier.explain_prediction(ticker_row), "date": pd.Timestamp(feature["date"]).strftime("%Y-%m-%d"),
+                   "vol_zscore": float(feature.volume_zscore_20d), "vix_level": float(feature.vix_level),
+                   "event_flags": {"fomc": bool(feature.fomc_flag), "cpi": bool(feature.cpi_flag), "nfp": bool(feature.nfp_flag)}})
+    anomaly = load_anomaly_detector(ROOT / "models")
+    anomaly_value = float(anomaly.anomaly_score(feature))
+    # Use the same Prophet+ARIMA interface on the available SPY-volume history.
+    history = features.iloc[:-1][["date", "total_volume", "fomc_flag", "cpi_flag", "nfp_flag"]].tail(90)
+    # Reuse the production-selected ARIMA order for responsive live inference;
+    # order selection belongs to offline training/backtesting, not the SRE UI.
+    forecaster = VolumeForecaster(arima_order=(2, 0, 0))
+    next_day = forecaster.forecast_next_day(history)
+    surprise = forecaster.forecast_surprise(float(feature.total_volume), float(next_day["forecast"]))
+    result = VoltexAgent().generate_alert(market, {"forecast_surprise_zscore": surprise},
+                                          {"anomaly_score": anomaly_value, "anomaly_elevated": anomaly_value >= .9})
+    return {"event": "Live SPY/^VIX proxy", "date": market["date"], "market_risk_tier": market["market_risk_tier"],
+            "stress_breadth": market["stress_breadth"], "p_critical": market["p_critical"], "p_high": market["p_high"],
+            "vol_zscore": market["vol_zscore"], "vix_level": market["vix_level"], "forecast_surprise_zscore": surprise, "anomaly_score": anomaly_value, "lead_time_minutes": 15,
+            "agent_path": "llm" if result["llm_used"] else "fallback", "guardrails": result["guardrail_results"],
+            "latency_ms": result["latency_ms"], "alert": result["alert"], "feed_status": feed_status,
+            "source_note": "Live SPY-only proxy; constituent stress breadth unavailable."}

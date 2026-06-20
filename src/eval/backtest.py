@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import __main__
 import json
-import pickle
 from pathlib import Path
 
 import numpy as np
@@ -16,7 +15,7 @@ from src.agent.agent import VoltexAgent
 from src.agent.signal import build_signal
 from src.data.features import FEATURE_COLUMNS, engineer_features
 from src.data.loader import LiveMarketLoader
-from src.models.anomaly import VoltexAnomalyDetector
+from src.models.anomaly import VoltexAnomalyDetector, load_anomaly_detector
 from src.models.classifier import RiskLabeler, aggregate_to_market, load_classifier
 from .gates import evaluate_gates, gate_dicts
 from .report import write_report
@@ -45,9 +44,8 @@ def covid_features(cache_path: str | Path = "data/cache/covid_2020.csv") -> pd.D
 
 def _artifacts():
     __main__.RiskLabeler = RiskLabeler
-    __main__.VoltexAnomalyDetector = VoltexAnomalyDetector
     classifier = load_classifier("models")
-    with open("models/anomaly.pkl", "rb") as handle: anomaly = pickle.load(handle)
+    anomaly = load_anomaly_detector("models")
     metrics = json.loads(Path("models/metrics.json").read_text())
     return classifier, anomaly, metrics
 

@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Mapping
+import time
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -64,17 +66,39 @@ class LiveMarketLoader:
     def __init__(self, cache_path: str | Path = "data/cache/live_market.csv") -> None:
         self.cache_path = Path(cache_path)
 
-    def load(self, start: str, end: str | None = None) -> pd.DataFrame:
-        try:
-            return self._fetch_yfinance(start, end)
-        except Exception as exc:  # External APIs must not take the agent down.
+    def load(self, start: str | None = None, end: str | None = None, period: str = "5d", prefer_fresh_cache: bool = False) -> pd.DataFrame:
+        return self.load_with_status(start=start, end=end, period=period, prefer_fresh_cache=prefer_fresh_cache)[0]
+
+    def load_with_status(self, start: str | None = None, end: str | None = None, period: str = "5d", prefer_fresh_cache: bool = False) -> tuple[pd.DataFrame, str]:
+        """Fetch a recent trading-day window with retry, then use cache safely."""
+        if prefer_fresh_cache and self.cache_path.exists():
+            age = datetime.now().timestamp() - self.cache_path.stat().st_mtime
+            if age <= timedelta(hours=24).total_seconds():
+                cached = pd.read_csv(self.cache_path, parse_dates=["date"])
+                return cached.sort_values("date").reset_index(drop=True), "cached"
+        error = None
+        for attempt in range(3):
+            try:
+                live = self._fetch_yfinance(start=start, end=end, period=period)
+                self.cache_path.parent.mkdir(parents=True, exist_ok=True)
+                if self.cache_path.exists():
+                    previous = pd.read_csv(self.cache_path, parse_dates=["date"])
+                    live = pd.concat([previous, live], ignore_index=True).drop_duplicates("date", keep="last").sort_values("date")
+                live.to_csv(self.cache_path, index=False)
+                return live.reset_index(drop=True), "live"
+            except Exception as exc:  # Slow external APIs get exponential backoff.
+                error = exc
+                if attempt < 2:
+                    time.sleep(2 ** attempt)
+        # External APIs must not take the agent down.
+        if error is not None:
             if self.cache_path.exists():
                 cached = pd.read_csv(self.cache_path, parse_dates=["date"])
-                return cached.sort_values("date").reset_index(drop=True)
+                return cached.sort_values("date").reset_index(drop=True), "cached"
             raise RuntimeError(
                 "Live market fetch failed and no cached CSV is available at "
                 f"{self.cache_path}"
-            ) from exc
+            ) from error
 
     def load_event_calendar(
         self, start: str, end: str, fred_api_key: str | None
@@ -104,10 +128,11 @@ class LiveMarketLoader:
             }
 
     @staticmethod
-    def _fetch_yfinance(start: str, end: str | None) -> pd.DataFrame:
+    def _fetch_yfinance(start: str | None = None, end: str | None = None, period: str = "5d") -> pd.DataFrame:
         import yfinance as yf
 
-        prices = yf.download(["SPY", "^VIX"], start=start, end=end, progress=False, auto_adjust=True)
+        request = {"start": start, "end": end} if start else {"period": period}
+        prices = yf.download(["SPY", "^VIX"], progress=False, auto_adjust=True, timeout=30, **request)
         if prices.empty:
             raise RuntimeError("yfinance returned no rows")
         spy = prices.xs("SPY", level=1, axis=1).dropna()

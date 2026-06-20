@@ -1,4 +1,4 @@
-from src.dashboard.data import available_dates, load_audit, load_backtest, load_validation, replay_day
+from src.dashboard.data import available_dates, forecast_chart_data, load_audit, load_backtest, load_validation, replay_day
 
 
 def test_dashboard_artifact_loaders():
@@ -15,3 +15,9 @@ def test_black_monday_replay_is_complete():
 
 def test_audit_log_loader_graceful():
     assert set(["timestamp", "date", "tier", "path", "guardrails", "latency_ms"]).issubset(load_audit().columns)
+
+
+def test_black_monday_forecast_chart_is_trailing_window():
+    chart = forecast_chart_data("2015-08-24")
+    assert len(chart) == 10
+    assert {"actual", "forecast", "alert_threshold"}.issubset(chart.columns)

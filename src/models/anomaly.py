@@ -93,6 +93,15 @@ class VoltexAnomalyDetector:
             pickle.dump(self, handle)
 
 
+def load_anomaly_detector(artifact_dir: str | Path = "models") -> VoltexAnomalyDetector:
+    """Load the stable module-qualified anomaly artifact."""
+    with (Path(artifact_dir) / "anomaly.pkl").open("rb") as handle:
+        detector = pickle.load(handle)
+    if not isinstance(detector, VoltexAnomalyDetector):
+        raise TypeError("models/anomaly.pkl is not a VoltexAnomalyDetector")
+    return detector
+
+
 def _normal_training_rows(frame: pd.DataFrame) -> pd.DataFrame:
     dated = frame.copy()
     dated["date"] = pd.to_datetime(dated["date"])
