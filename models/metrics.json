@@ -276,9 +276,9 @@
     ]
   },
   "agent": {
-    "alerts_generated": 51,
-    "llm_path_count": 25,
-    "fallback_count": 26,
+    "alerts_generated": 80,
+    "llm_path_count": 53,
+    "fallback_count": 27,
     "latencies_ms": [
       1.767,
       0.044,
@@ -330,12 +330,59 @@
       2126.398,
       3234.693,
       3326.41,
-      2993.607
+      2993.607,
+      5113.026,
+      3869.391,
+      4980.315,
+      3541.518,
+      4392.409,
+      3502.922,
+      3299.871,
+      5187.646,
+      58137.888,
+      23563.696,
+      4217.002,
+      4893.594,
+      4347.918,
+      4959.433,
+      4454.146,
+      3601.39,
+      3004.172,
+      4273.249,
+      3999.016,
+      6854.159,
+      4894.059,
+      3272.803,
+      4814.142,
+      4074.544,
+      5149.099,
+      9139.994,
+      4753.938,
+      4751.668,
+      4611.503
     ],
     "latest_guardrail_results": {
-      "passed": false,
+      "passed": true,
       "failures": [],
-      "path": "fallback"
+      "checks": {
+        "G1_tier_immutability": {
+          "passed": true,
+          "reason": "tier and probabilities immutable"
+        },
+        "G2_driver_containment": {
+          "passed": true,
+          "reason": "drivers contained"
+        },
+        "G3_precedent_containment": {
+          "passed": true,
+          "reason": "precedents contained"
+        },
+        "G4_reasoning_filter": {
+          "passed": true,
+          "reason": "reasoning filter passed"
+        }
+      },
+      "path": "llm"
     }
   },
   "evaluation": {
